@@ -1,7 +1,7 @@
-extends GameGlobal
+extends Node
 # if utilising without the DDAT-GPF framework make sure you change this
 #	script to extend from Node!
-#extends Node
+#extends GameGlobal
 
 #class_name GlobalStat
 
