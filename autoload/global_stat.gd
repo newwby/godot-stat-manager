@@ -36,13 +36,13 @@ func add(arg_owner: Object, arg_name: String, arg_base_value: float, arg_allow_o
 		return ERR_INVALID_PARAMETER
 	var new_stat_data = Stat.new(arg_owner, arg_name, arg_base_value)
 	if is_instance_valid(new_stat_data):
-		_verify_stat(arg_owner, arg_name, arg_allow_overwrite)
-		var can_create := true
-		if stats[arg_owner].has(arg_name):
-			can_create = true if arg_allow_overwrite else false
-		if can_create:
-			stats[arg_owner][arg_name] = new_stat_data
-			return OK
+		if _verify_stat(arg_owner, arg_name, arg_allow_overwrite):
+			var can_create := true
+			if stats[arg_owner].has(arg_name):
+				can_create = true if arg_allow_overwrite else false
+			if can_create:
+				stats[arg_owner][arg_name] = new_stat_data
+				return OK
 	#else:
 	return ERR_CANT_CREATE
 
