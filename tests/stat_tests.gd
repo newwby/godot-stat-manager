@@ -2,7 +2,7 @@ extends Node
 
 #class_name Name
 
-var GlobalStatTest = preload("res://src/_game/autoload/global_stat.gd").new()
+var GlobalStatTest = preload("res://autoload/global_stat.gd").new()
 
 ##############################################################################
 
