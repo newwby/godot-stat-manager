@@ -65,27 +65,36 @@ func apply_mod_more(arg_owner: Object, arg_name: String, arg_mod_id: String, arg
 	_apply_modifier(arg_mod_id, arg_owner, arg_name, Stat.MODIFIER.MORE, arg_value, arg_duration)
 
 
-# if the Stat exists, retrieves that Stat. Otherwise throws an error.
+# if the Stat exists, returns that Stat. Otherwise throws an error.
 func find(arg_owner: Object, arg_name: String) -> Stat:
 	var subject_stat_data = null
+	if has(arg_owner, arg_name):
+		if stats.has(arg_owner):
+			if typeof(stats[arg_owner]) == TYPE_DICTIONARY:
+				if stats[arg_owner].has(arg_name):
+					var get_stat = stats[arg_owner][arg_name]
+					if get_stat is Stat:
+						return get_stat
+	# catchall
+	StatLogger.error(self, "could not find {0} in stats[{1}]; cannot find Stat".format([arg_name, arg_owner]))
+	return null
+
+
+# as find() method but does not expect a Stat exists
+func has(arg_owner: Object, arg_name: String) -> bool:
+	var subject_stat_data = null
 	if stats.has(arg_owner) == false:
-		StatLogger.error(self, "cannot find stats[{0}]; cannot find Stat".format([arg_owner]))
+		return false
 	if stats[arg_owner].has(arg_name):
 		subject_stat_data = stats[arg_owner][arg_name]
 		if subject_stat_data is Stat:
-			return subject_stat_data
+			return true
 		else:
 			StatLogger.error(self, "invalid object stored in stats[{0}][{1}]! How did this happen?".\
 					format([arg_owner, arg_name]))
-			return null
+			return false
 	else:
-		StatLogger.error(self, "cannot find {0} in stats[{1}]; cannot find Stat".format([arg_name, arg_owner]))
-		return null
-		# deprecated behaviour
-		# no longer creates empty stat tracker
-#		subject_stat_data = Stat.new(arg_owner, arg_name)
-#		stats[arg_owner][arg_name] = subject_stat_data
-#		return subject_stat_data
+		return false
 
 
 # returns stat as an int value, rounded down to nearest whole
