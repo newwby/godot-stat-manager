@@ -88,8 +88,16 @@ You can alternatively use the GlobalStat singleton (once set as autoload, see th
 
 **e.g.**
 ```
+# how to use anywhere in your project
 GlobalStat.add(owner, "speed", 50) # initialises Stat
 GlobalStat.get_real(owner, "speed") # returns float to do stuff
+
+# how to use within local scope (the owning script)
+
+var speed := 50.0 # note that this value is irrelevant will be overridden
+
+func get_speed() -> float:
+  return GlobalStat.get_real(owner, "speed")
 ```
 
 **Pro**
@@ -98,4 +106,5 @@ GlobalStat.get_real(owner, "speed") # returns float to do stuff
 
 **Con**
 - You have to specify the lookup (owner, name) in every API method as the first two arguments. This is a noticeable additional amount of argument specifying that introduces more room for human error.
+- You still have to modify getters if you wish the default property to return the modified Stat value
 
