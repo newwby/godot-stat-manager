@@ -65,13 +65,22 @@ You can directly use Stats as variants in your owner object, adjusting the sette
 
 **e.g.**
 ```
-# Create a Stat named 'speed' with a base value of 50.0, belonging to the script
-# Note that the variant is untyped so the getter can return a non-Stat value
-var speed = Stat.new(self, "speed", 50) setget , get_speed
+# Create a property with a float value
+# Create a second property with a Stat value; initailise said Stat with the property value
+# Create  a setter and getter
+var speed := 50.0 setget set_speed, get_speed
+var speed_stat = Stat.new(self, "speed", speed)
 
 # getter that returns either the get_int() or get_real() method of the Stat
 func get_speed() -> float:
   return speed.get_real()
+
+# setter that updates the stat base value if the property is directly adjusted
+func set_speed(arg_value: float) -> void:
+  speed = arg_value
+  if is_instance_valid(speed_stat):
+    speed_stat.base_value = arg_value
+
 ```
 
 **Pro**
@@ -81,6 +90,7 @@ func get_speed() -> float:
 **Con**
 - Cannot access stat object outside of the owning script (unless you use a secondary property/variant and getter to return get_int/get_real rather than the variant holding the Stat object)
 - Owner and stat must be correctly scoped or passed in order to get the value
+- Setter/getter setup required, and two properties required per property you wish to track with a Stat
 
 ## API method
 
@@ -88,22 +98,34 @@ You can alternatively use the GlobalStat singleton (once set as autoload, see th
 
 **e.g.**
 ```
-
-# how to initialise (in owner script)
-
-func _init(<args>) -> void:
-  GlobalStat.add(owner, "speed", 50) # initialises Stat, make sure to call this before trying to find stat
-
 # how to reference anywhere in your project
 
 GlobalStat.get_real(owner, "speed") # returns float to do stuff
 
-# how to use as a getter within local scope (the owning script)
+# how to initialise and use within local scope
 
-var speed := 50.0 # note that this value is irrelevant will be overridden
+var speed := 50.0
+
+func _init(<args>) -> void:
+  GlobalStat.add(self, "speed", speed) # initialises Stat, make sure to call this before trying to find stat
 
 func get_speed() -> float:
-  return GlobalStat.get_real(owner, "speed")
+  if GlobalStat.has(self, "speed"):
+    return GlobalStat.get_real(self, "speed")
+  else:
+    return speed
+
+func set_speed(arg_value: float) -> void:
+  speed = arg_value
+  if GlobalStat.has(self, "speed"):
+    GlobalStat.update_base_value(self, "speed", arg_value)
+
+# In Godot 3.5 make sure you are calling the setter to utilise the above example
+e.g.
+  var _get_speed = self.speed
+_not_
+  var _get_speed = speed
+
 ```
 
 **Pro**
@@ -111,7 +133,7 @@ func get_speed() -> float:
 + Access to all Stat class methods through the API methods
 
 **Con**
-- You have to specify the lookup (owner, name) in every API method as the first two arguments. This is a noticeable additional amount of argument specifying that introduces more room for human error.
+- You have to specify the lookup (owner, name) in every API method as the first two arguments. This is an additional amount of argument specifying that introduces more room for human error.
 - You still have to modify getters if you wish the default property to return the modified Stat value
-- Setup is a little more involved (you must make sure the stat exists before anyone tries to reference it)
+- Calling the Stat value requires being sure the Stat exists (use GlobalStat.has()) before anyone tries to reference it
 
